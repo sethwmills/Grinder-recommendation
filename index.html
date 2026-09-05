@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espresso Grinder Comparison</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --tint:#f5f5f7;
+    --ink:#1d1d1f;
+    --sub:#6e6e73;
+    --line:#e2e2e7;
+    --line-strong:#d2d2d7;
+    --blue:#0071e3;
+    --yes:#34c759;
+    --partial:#ff9f0a;
+    --no:#c7c7cc;
+    --pick:#0071e3;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.4;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:56px 24px 80px;}
+
+  /* Hero */
+  .hero{text-align:center;margin-bottom:40px;}
+  .hero h1{
+    font-size:44px;
+    font-weight:600;
+    letter-spacing:-0.025em;
+    margin:0 0 12px;
+  }
+  .hero p{
+    font-size:19px;
+    color:var(--sub);
+    margin:0 auto;
+    max-width:620px;
+    letter-spacing:-0.01em;
+  }
+
+  /* Legend */
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:22px;
+    margin:26px 0 6px;
+    font-size:14px;
+    color:var(--sub);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:8px;}
+
+  /* Indicator dots */
+  .dot{
+    width:22px;height:22px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+    flex:0 0 auto;
+  }
+  .dot svg{width:13px;height:13px;display:block;}
+  .dot.yes{background:var(--yes);}
+  .dot.partial{background:var(--partial);}
+  .dot.no{background:#ececef;}
+  .dot.no i{width:10px;height:2px;background:var(--no);border-radius:2px;display:block;}
+
+  /* Table */
+  .scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:22px;}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:860px;
+    table-layout:fixed;
+  }
+  col.label{width:198px;}
+  col.prod{width:auto;}
+
+  /* Header product cards: top-aligned, every zone fixed so columns line up */
+  thead th{
+    vertical-align:top;
+    padding:6px 14px 24px;
+    text-align:center;
+    border-bottom:1px solid var(--line-strong);
+    position:sticky;top:0;
+    background:var(--bg);
+  }
+  thead th.corner{border-bottom:1px solid var(--line-strong);background:var(--bg);}
+  thead th.pickcol{
+    background:linear-gradient(180deg,#f5faff 0%,var(--bg) 70%);
+  }
+
+  .card{display:flex;flex-direction:column;align-items:stretch;}
+
+  .badge-slot{height:24px;margin-bottom:14px;display:flex;justify-content:center;align-items:center;}
+  .badge{
+    display:inline-block;
+    font-size:11px;font-weight:600;letter-spacing:0.02em;
+    color:#fff;background:var(--pick);
+    padding:4px 11px;border-radius:20px;line-height:1;
+  }
+  .badge.ghost{background:#e8e8ed;color:var(--sub);}
+
+  .img-wrap{
+    position:relative;
+    height:168px;
+    padding:18px;
+    border-radius:18px;
+    background:var(--tint);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .card.pick .img-wrap{background:#eef6ff;}
+  .img-wrap .fallback{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:0 16px;
+    font-size:13px;color:#a1a1a8;letter-spacing:-0.01em;line-height:1.5;
+    z-index:0;
+  }
+  .img-wrap .fallback b{color:#8a8a90;font-weight:600;}
+  .img-wrap img{
+    position:relative;z-index:1;
+    max-width:100%;max-height:100%;
+    width:auto;height:auto;object-fit:contain;
+    display:block;
+  }
+
+  .pname{
+    font-size:18px;font-weight:600;letter-spacing:-0.015em;
+    margin:0 0 5px;min-height:46px;
+  }
+  .ptag{
+    font-size:13px;color:var(--sub);letter-spacing:-0.005em;
+    margin:0 0 16px;min-height:54px;line-height:1.4;
+  }
+  .price{font-size:22px;font-weight:600;letter-spacing:-0.02em;margin:0;}
+  .price small{
+    display:block;font-size:12px;font-weight:400;color:var(--sub);
+    margin-top:5px;letter-spacing:0;line-height:1.35;min-height:32px;
+  }
+
+  /* Matrix body */
+  tbody th{
+    text-align:left;
+    font-size:15px;font-weight:500;
+    color:var(--ink);
+    padding:16px 14px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  tbody th small{display:block;font-weight:400;color:var(--sub);font-size:12px;margin-top:2px;}
+  tbody td{
+    text-align:center;
+    font-size:15px;
+    color:var(--ink);
+    padding:16px 14px;
+    border-bottom:1px solid var(--line);
+    border-left:1px solid var(--line);
+    vertical-align:middle;
+  }
+  tbody td.val{font-weight:500;letter-spacing:-0.01em;}
+  tbody td .cap{display:block;font-size:11.5px;color:var(--sub);font-weight:400;margin-top:4px;letter-spacing:0;line-height:1.3;}
+  tbody tr td:first-of-type{border-left:none;}
+
+  .cell-center{display:flex;justify-content:center;}
+
+  /* Recommendation */
+  .rec{
+    margin-top:52px;
+    background:var(--tint);
+    border-radius:22px;
+    padding:38px 40px;
+  }
+  .rec h2{font-size:15px;font-weight:600;color:var(--sub);letter-spacing:0.01em;margin:0 0 14px;}
+  .rec .big{font-size:26px;font-weight:600;letter-spacing:-0.02em;margin:0 0 14px;line-height:1.25;}
+  .rec .big b{color:var(--blue);font-weight:600;}
+  .rec p{font-size:16px;color:#38383c;margin:0 0 14px;max-width:760px;letter-spacing:-0.01em;}
+  .rec p:last-child{margin-bottom:0;}
+  .rec .alt{font-size:14.5px;color:var(--sub);}
+
+  .foot{margin-top:30px;font-size:12.5px;color:var(--sub);text-align:center;line-height:1.6;}
+  .foot .tip{display:inline-block;background:var(--tint);border-radius:20px;padding:8px 16px;color:#38383c;}
+
+  @media (max-width:720px){
+    .wrap{padding:36px 16px 60px;}
+    .hero h1{font-size:32px;}
+    .hero p{font-size:16px;}
+    .rec{padding:26px 22px;}
+    .rec .big{font-size:21px;}
+  }
+  @media print{
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .wrap{padding:0;max-width:none;}
+    .scroller{overflow:visible;}
+    table{min-width:0;}
+    thead th{position:static;}
+    tbody tr{break-inside:avoid;}
+    .rec{break-inside:avoid;}
+    .foot .tip{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>Which grinder to buy</h1>
+    <p>Three top espresso grinders in the $400&ndash;$600 range, plus the stretch pick that does it all. Compared on what actually matters for weight-based espresso.</p>
+    <div class="legend">
+      <span><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Yes</span>
+      <span><span class="dot partial"><svg viewBox="0 0 20 20"><path d="M5 10h10" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span> With a caveat</span>
+      <span><span class="dot no"><i></i></span> No</span>
+    </div>
+  </header>
+
+  <div class="scroller">
+  <table>
+    <colgroup>
+      <col class="label">
+      <col class="prod"><col class="prod"><col class="prod"><col class="prod">
+    </colgroup>
+
+    <thead>
+      <tr>
+        <th class="corner"></th>
+
+        <!-- Vario W+ : the pick -->
+        <th class="pickcol">
+          <div class="card pick">
+            <div class="badge-slot"><span class="badge">Our pick</span></div>
+            <div class="img-wrap">
+              <span class="fallback">Save photo as<br><b>vario-w-plus.jpg</b></span>
+              <img src="vario-w-plus.jpg" alt="Baratza Vario W+" onerror="this.style.display='none'">
+            </div>
+            <p class="pname">Baratza Vario W+</p>
+            <p class="ptag">Flat burrs plus real weight dosing, and repairable for a decade.</p>
+            <p class="price">$599.95<small>Clive &middot; Prima &middot; Seattle Coffee Gear</small></p>
+          </div>
+        </th>
+
+        <!-- Sette 270Wi -->
+        <th>
+          <div class="card">
+            <div class="badge-slot"><span class="badge ghost">Fastest</span></div>
+            <div class="img-wrap">
+              <span class="fallback">Save photo as<br><b>sette-270wi.jpg</b></span>
+              <img src="sette-270wi.jpg" alt="Baratza Sette 270Wi" onerror="this.style.display='none'">
+            </div>
+            <p class="pname">Baratza Sette 270Wi</p>
+            <p class="ptag">Weighs straight into the portafilter. Near-zero retention.</p>
+            <p class="price">~$549<small>Best value via Baratza refurb</small></p>
+          </div>
+        </th>
+
+        <!-- DF64 Gen 2 -->
+        <th>
+          <div class="card">
+            <div class="badge-slot"><span class="badge ghost">Best cup / $</span></div>
+            <div class="img-wrap">
+              <span class="fallback">Save photo as<br><b>df64-gen2.jpg</b></span>
+              <img src="df64-gen2.jpg" alt="DF64 Gen 2" onerror="this.style.display='none'">
+            </div>
+            <p class="pname">DF64 Gen 2</p>
+            <p class="ptag">64mm flats, the enthusiast favorite. Pair with a scale.</p>
+            <p class="price">$399<small>Espresso Outlet (US)</small></p>
+          </div>
+        </th>
+
+        <!-- Libra -->
+        <th>
+          <div class="card">
+            <div class="badge-slot"><span class="badge ghost">Stretch</span></div>
+            <div class="img-wrap">
+              <span class="fallback">Save photo as<br><b>mignon-libra.jpg</b></span>
+              <img src="mignon-libra.jpg" alt="Eureka Mignon Libra" onerror="this.style.display='none'">
+            </div>
+            <p class="pname">Eureka Mignon Libra</p>
+            <p class="ptag">The no-compromise version of everything above, over budget.</p>
+            <p class="price">$799<small>Clive &middot; Whole Latte Love</small></p>
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <th>Price</th>
+        <td class="val">$599.95</td>
+        <td class="val">~$549<span class="cap">less refurbished</span></td>
+        <td class="val">$399</td>
+        <td class="val">$799</td>
+      </tr>
+
+      <tr>
+        <th>Burrs</th>
+        <td class="val">54mm flat steel</td>
+        <td class="val">40mm conical</td>
+        <td class="val">64mm flat</td>
+        <td class="val">55mm flat steel</td>
+      </tr>
+
+      <tr>
+        <th>Grind by weight <small>to 0.1g target</small></th>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot no"><i></i></span></div><span class="cap">timed only</span></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+      </tr>
+
+      <tr>
+        <th>Real-world dose accuracy</th>
+        <td class="val">&plusmn;0.2g</td>
+        <td class="val">&plusmn;0.3g</td>
+        <td class="val">use a scale</td>
+        <td class="val">&plusmn;0.2g</td>
+      </tr>
+
+      <tr>
+        <th>Weighs into the portafilter <small>vs into a bin</small></th>
+        <td><div class="cell-center"><span class="dot no"><i></i></span></div><span class="cap">weighs in bin</span></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot no"><i></i></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+      </tr>
+
+      <tr>
+        <th>Tuned for espresso out of the box</th>
+        <td><div class="cell-center"><span class="dot partial"><svg viewBox="0 0 20 20"><path d="M5 10h10" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span></div><span class="cap">recalibrate finer</span></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+      </tr>
+
+      <tr>
+        <th>Near-zero retention</th>
+        <td><div class="cell-center"><span class="dot partial"><svg viewBox="0 0 20 20"><path d="M5 10h10" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot partial"><svg viewBox="0 0 20 20"><path d="M5 10h10" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span></div></td>
+      </tr>
+
+      <tr>
+        <th>Quiet operation</th>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot no"><i></i></span></div><span class="cap">loudest in class</span></td>
+        <td><div class="cell-center"><span class="dot partial"><svg viewBox="0 0 20 20"><path d="M5 10h10" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+      </tr>
+
+      <tr>
+        <th>Build &amp; serviceability</th>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><span class="cap">user-repairable</span></td>
+        <td><div class="cell-center"><span class="dot partial"><svg viewBox="0 0 20 20"><path d="M5 10h10" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span></div><span class="cap">ABS shell, spotty</span></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><span class="cap">moddable</span></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><span class="cap">Italian-built</span></td>
+      </tr>
+
+      <tr>
+        <th>Also grinds filter</th>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot yes"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></td>
+        <td><div class="cell-center"><span class="dot no"><i></i></span></div><span class="cap">espresso only</span></td>
+      </tr>
+
+      <tr>
+        <th>Best for</th>
+        <td class="val">Weight ease + reliability</td>
+        <td class="val">Fastest workflow</td>
+        <td class="val">Best flavor per dollar</td>
+        <td class="val">No compromises</td>
+      </tr>
+
+      <tr>
+        <th>Where to buy</th>
+        <td class="val">Clive / Prima / SCG</td>
+        <td class="val">baratza.com refurb</td>
+        <td class="val">espressooutlet.net</td>
+        <td class="val">Clive / WLL</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <section class="rec">
+    <h2>The recommendation</h2>
+    <p class="big">Buy the <b>Baratza Vario W+</b> at $599.</p>
+    <p>It is the only grinder in budget that pairs flat burrs with true weight dosing, and Baratza's repairability means it outlasts everything else here. Run the included calibration tool to shift it finer for espresso on day one, then it is exactly the set-the-weight, pull-the-shot experience you want.</p>
+    <p class="alt">If they will stretch $200, the Mignon Libra is the grinder that does the whole job without an asterisk. And if flavor beats workflow for them, the DF64 Gen 2 plus a $40 dosing scale outclasses all three in the cup for about $440 total, which is the move most of the single-dose crowd would actually make.</p>
+  </section>
+
+  <p class="foot">
+    Add the four product photos (named below) to the same folder as this file and they appear automatically.<br>
+    <b>vario-w-plus.jpg</b> &nbsp;&middot;&nbsp; <b>sette-270wi.jpg</b> &nbsp;&middot;&nbsp; <b>df64-gen2.jpg</b> &nbsp;&middot;&nbsp; <b>mignon-libra.jpg</b><br>
+    Prices as of Sept 2026 and worth re-checking before buying.<br><br>
+    <span class="tip">Tip: to export, use your browser's Print &rarr; Save as PDF for a clean sheet.</span>
+  </p>
+
+</div>
+</body>
+</html>
